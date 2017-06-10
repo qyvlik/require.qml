@@ -11,7 +11,7 @@ String.prototype.endWith = function(str){
 }
 
 function readFileSync(file, callable, error) {
-//    debug('readFileSync start: file:', file);
+    //    debug('readFileSync start: file:', file);
     function setHeader(xhr, headers) {
         //"Content-Type":"application/x-www-form-urlencoded"
         for(var iter in headers) {
@@ -81,21 +81,35 @@ function getThisPath() {
 }
 
 var modulesCache = {};
+var modulesExportsCache = {};
 
 var debugEnable = false;
 var recursionDepth = 0;
+
 var debug = function() {
+
+    function spaceString(len) {
+        var s = "";
+        while(len !== 0) {
+            s += "      ";
+            len--;
+        }
+        return s;
+    }
+
     if (debugEnable) {
-        var depth = new String(' ', recursionDepth);
+        var depth = spaceString(recursionDepth);
         var argsLenght = arguments.length;
         arguments.length += 1;
         while(argsLenght != 0) {
             arguments[argsLenght] = arguments[argsLenght-1];
             argsLenght -= 1;
         }
-        arguments[0] = depth;
+        arguments[0] = recursionDepth + depth;
+        //        arguments[0] = depth;
         console.debug.apply(console, arguments);
     }
+
 }
 
 
@@ -114,7 +128,7 @@ function requireDefaultContext(dirname) {
         'filename': ""
     };
 
-    debug("requireDefaultContext ctx:", JSON.stringify(ctx));
+    //    debug("requireDefaultContext ctx:", JSON.stringify(ctx));
 
     return ctx;
 }
@@ -157,19 +171,41 @@ function requireBuilder(ctx) {
     var exports = ctx.exports;
 
     function requireFun(moduleName) {
+        debug('require start:', moduleName);
+
         var suffixList = ['', '.js', '.json', '.node',
                           '/index.js',
                           '/package.json',                      // TODO search `main`
                           '/index.json', '/index.node'];
 
-        function compileSync(jsText) {
+        function compileSync(moduleFullFileNamePath, jsText) {
             var fun = new Function("require", "module", "exports", jsText);
             try {
+                recursionDepth++;
+
+//                debug("typeof modulesExportsCache[",moduleFullFileNamePath,"]:",
+//                      typeof modulesExportsCache[moduleFullFileNamePath]);
+
+                if (typeof modulesExportsCache[moduleFullFileNamePath] !== 'undefined') {
+                    module.exports = modulesExportsCache[moduleFullFileNamePath];
+                    debug('exports from cache: [', moduleFullFileNamePath, "]",
+                          typeof modulesExportsCache[moduleFullFileNamePath]);
+//                    debug('exports from cache size: [', moduleFullFileNamePath, "]",
+//                          JSON.stringify(modulesExportsCache[moduleFullFileNamePath]));
+                    return;
+                }
+
                 fun(requireBuilder(requireDefaultContext(nextModuleDirName)),
                     module, exports);
+
+                modulesExportsCache[moduleFullFileNamePath] = module.exports;
+
             } catch(e) {
                 console.trace();
                 throw new Error('requireFun: ' + moduleFullFileNamePath + ' fail e:' + e);
+
+            } finally {
+                recursionDepth--;
             }
         }
 
@@ -194,14 +230,14 @@ function requireBuilder(ctx) {
 
             if (typeof jsFileTextContent != 'undefined' && jsFileTextContent !== '') {
                 debug('modulesCache[', moduleFullFileNamePath, "]: not emtpy");
-                compileSync(jsFileTextContent);
+                compileSync(moduleFullFileNamePath, jsFileTextContent);
                 readFile = true;
                 break;
             }
 
             readFileSync(moduleFullFileNamePath, function(jsText){
                 debug('compileSync start:', moduleFullFileNamePath);
-                compileSync(jsText);
+                compileSync(moduleFullFileNamePath, jsText);
                 debug('compileSync success:', moduleFullFileNamePath);
 
                 modulesCache[moduleFullFileNamePath] = jsText;
@@ -215,6 +251,8 @@ function requireBuilder(ctx) {
                 // debug('requireFun readFileSync fail e:' + e);
             });
         }
+
+        debug('require end:', moduleName);
 
         return module.exports;
     }

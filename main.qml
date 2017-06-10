@@ -10,6 +10,24 @@ Item {
     Keys.onEscapePressed: {
         Qt.quit();
     }
+
+    Text {
+        anchors.centerIn: parent
+        text: "runAllTry"
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: runAllTry();
+    }
+
+    function runAllTry() {
+        for(var iter in R) {
+            if (iter.startWith("try")) {
+                R[iter]();
+            }
+        }
+    }
 }
 
 

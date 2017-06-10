@@ -19,7 +19,6 @@ Project {
         directory: "."
         filter: "*.md"
     }
-
     Files {
         directory: "."
         filter: "*.json"
