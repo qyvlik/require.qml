@@ -41,3 +41,6 @@ CMakeLists.txt.user*
 *.qmlc
 *.jsc
 
+# nodejs
+node_modules
+

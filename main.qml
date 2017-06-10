@@ -1,6 +1,7 @@
 import QtQuick 2.6
 
-import "./run.js" as R;
+import "./run.js" as R
+//import QmlProject 1.1
 
 Item {
     visible: true
@@ -8,10 +9,14 @@ Item {
     height: 320
     focus: true
     Keys.onEscapePressed: {
-        Qt.quit()
+        Qt.quit();
+//        f.files
     }
+//    JavaScriptFiles {
+//        id: f
+//        directory: "."
 
-    Component.onCompleted: {
-        R.util.func();
-    }
+//    }
 }
+
+
