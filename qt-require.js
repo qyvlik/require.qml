@@ -114,6 +114,16 @@ var debug = function() {
 
 
 function requireDefaultContext(dirname) {
+    var ctx = {
+        'dirname': dirname,
+    };
+
+    //    debug("requireDefaultContext ctx:", JSON.stringify(ctx));
+
+    return ctx;
+}
+
+function requireModuleContext() {
     var module = {};
     var exports = {};
     module.exports = exports;
@@ -121,16 +131,7 @@ function requireDefaultContext(dirname) {
     module.parent = null;
     module.filename = null;
     module.id = null;
-    var ctx = {
-        'module': module,
-        'exports': exports,
-        'dirname': dirname,
-        'filename': ""
-    };
-
-    //    debug("requireDefaultContext ctx:", JSON.stringify(ctx));
-
-    return ctx;
+    return module;
 }
 
 function getFileWithSuffix(dirname, fileName, suffix) {
@@ -162,16 +163,18 @@ function getFileWithSuffix(dirname, fileName, suffix) {
     return [dirnameList.join("/"), fullFileName];
 }
 
+
+
 function requireBuilder(ctx) {
 
     ctx = ctx || requireDefaultContext('');
 
-    var dirname = ctx.dirname;
-    var module = ctx.module;
-    var exports = ctx.exports;
-
     function requireFun(moduleName) {
         debug('require start:', moduleName);
+
+        var dirname = ctx.dirname;
+        var module = requireModuleContext();
+        var exports = module.exports;
 
         var suffixList = ['', '.js', '.json', '.node',
                           '/index.js',
@@ -188,6 +191,7 @@ function requireBuilder(ctx) {
 
                 if (typeof modulesExportsCache[moduleFullFileNamePath] !== 'undefined') {
                     module.exports = modulesExportsCache[moduleFullFileNamePath];
+
                     debug('exports from cache: [', moduleFullFileNamePath, "]",
                           typeof modulesExportsCache[moduleFullFileNamePath]);
 //                    debug('exports from cache size: [', moduleFullFileNamePath, "]",
@@ -198,12 +202,26 @@ function requireBuilder(ctx) {
                 fun(requireBuilder(requireDefaultContext(nextModuleDirName)),
                     module, exports);
 
+                for(var iter in exports) {
+                    debug('compileSync:', moduleFullFileNamePath,' exports', iter,  exports[iter]);
+                }
+
+                for(var iter0 in module.exports) {
+                    debug('compileSync:', moduleFullFileNamePath,' module.exports', iter0,  module.exports[iter0]);
+                }
+
                 modulesExportsCache[moduleFullFileNamePath] = module.exports;
 
             } catch(e) {
-                console.trace();
-                throw new Error('requireFun: ' + moduleFullFileNamePath + ' fail e:' + e);
-
+                if (typeof e.message !== 'undefined') {
+                    console.error(e.message);
+                    console.error(e.name, e.fileName , e.lineNumber);
+                    console.error(e.stack);
+                } else {
+                    console.error(e);
+                    console.trace();
+                }
+                throw new Error('requireFun: ' + moduleFullFileNamePath);
             } finally {
                 recursionDepth--;
             }

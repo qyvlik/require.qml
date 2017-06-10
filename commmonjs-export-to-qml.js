@@ -16,8 +16,14 @@ function tryPako() {
         // maybe: https://github.com/nodeca/pako/pull/49
         var restored = JSON.parse(pako.inflate(binaryString, { to: 'string' }));
     } catch(e) {
-        console.trace();
-        console.error(e);
+        if (typeof e.message !== 'undefined') {
+            console.error(e.message);
+            console.error(e.name, e.fileName , e.lineNumber);
+            console.error(e.stack);
+        } else {
+            console.error(e);
+            console.trace();
+        }
     }
 }
 
@@ -28,8 +34,8 @@ function tryCryptoJS() {
         var SHA256 = require("crypto-js/sha256");
         console.log(SHA256("Message"));
     } catch(e) {
-        console.trace();
         console.error(e);
+        console.trace();
     }
 }
 
