@@ -1,6 +1,9 @@
 Qt.include("qt-require.js");
 
-var pako = require('./node_modules/pako/index.js');
+var require = requireBuilder(requireDefaultContext('./node_modules'));
+
+
+var pako = require('pako');
 
 var test = { my: 'super', puper: [456, 567], awesome: 'pako' };
 

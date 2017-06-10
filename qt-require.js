@@ -1,12 +1,12 @@
 .pragma library
 
 String.prototype.startWith = function(str){
-    var reg=new RegExp("^"+str);
+    var reg = new RegExp("^"+str);
     return reg.test(this);
 }
 
 String.prototype.endWith = function(str){
-    var reg=new RegExp(str+"$");
+    var reg = new RegExp(str+"$");
     return reg.test(this);
 }
 
@@ -82,8 +82,8 @@ function getThisPath() {
 
 var modulesCache = {};
 
-var debugEnable = false
-
+var debugEnable = false;
+var recursionDepth = 0;
 var debug = function() {
     if (debugEnable) {
         var depth = new String(' ', recursionDepth);
@@ -158,7 +158,9 @@ function requireBuilder(ctx) {
 
     function requireFun(moduleName) {
         var suffixList = ['', '.js', '.json', '.node',
-                          '/package.json', '/index.js', '/index.json', '/index.node'];
+                          '/index.js',
+                          '/package.json',                      // TODO search `main`
+                          '/index.json', '/index.node'];
 
         function compileSync(jsText) {
             var fun = new Function("require", "module", "exports", jsText);
@@ -180,7 +182,7 @@ function requireBuilder(ctx) {
 
             var suffix = suffixList.shift();
             if (typeof suffix === 'undefined') {
-                throw new Error("not found: " + moduleFullFileNamePath);
+                throw new Error("not found: " + moduleName);
             }
 
             var pathInfo = getFileWithSuffix(dirname, moduleName, suffix);
@@ -220,10 +222,8 @@ function requireBuilder(ctx) {
     return requireFun;
 }
 
-
 var require = requireBuilder(requireDefaultContext(getThisPath()));
 
 //! [require() 源码解读](http://www.ruanyifeng.com/blog/2015/05/require.html)
-//! [](https://github.com/grassator/qml-commonjs?files=1)
+//! [grassator/qml-commonjs](https://github.com/grassator/qml-commonjs)
 //! [quickly/quickly](https://github.com/quickly/quickly)
-// setTimeout / clearTimeout / setInterval / clearInterval

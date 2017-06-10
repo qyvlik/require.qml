@@ -1,7 +1,6 @@
 import QtQuick 2.6
 
-import "./run.js" as R
-//import QmlProject 1.1
+import "commmonjs-export-to-qml.js" as R
 
 Item {
     visible: true
@@ -10,13 +9,7 @@ Item {
     focus: true
     Keys.onEscapePressed: {
         Qt.quit();
-//        f.files
     }
-//    JavaScriptFiles {
-//        id: f
-//        directory: "."
-
-//    }
 }
 
 
