@@ -12,6 +12,9 @@ Project {
     JavaScriptFiles {
         directory: "."
     }
+//    JavaScriptFiles {
+//        directory: "../node_modules"
+//    }
     ImageFiles {
         directory: "."
     }

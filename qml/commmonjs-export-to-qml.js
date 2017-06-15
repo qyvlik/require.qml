@@ -2,7 +2,7 @@ Qt.include("qt-require.js");
 
 //debugEnable = true;
 
-var require = requireBuilder(requireDefaultContext('./node_modules'));
+var require = requireBuilder(requireDefaultContext('../node_modules'));
 
 function __try(callback, error) {
     error = error || function(e) {
@@ -36,7 +36,7 @@ function tryPako() {
     });
 }
 
-function tryCryptoJS() {    
+function tryCryptoJS() {
     __try(function(){
         var CryptoJS = require("crypto-js");
         console.log(CryptoJS.HmacSHA1("Message", "Key"));
@@ -58,5 +58,13 @@ function tryShowdown() {
 
         var html      = converter.makeHtml(text);
         console.log('html:', html);
+    });
+}
+
+function tryJuice() {
+    __try(function(){
+//        var juice = require("juice/client.js");
+//        var result = juice("<style>div{color:red;}</style><div/>");
+//        console.log(result);
     });
 }
